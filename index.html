@@ -527,20 +527,76 @@
   /* ── Gold metallic card — replaces glass-strong ─────────── */
   #detailsCard {
     background: #FBF9F4 !important;
-    border: none !important;
-    border-radius: 26px !important;
+    border: 1.5px solid rgba(255,240,180,0.65) !important;
     box-shadow:
-      0 18px 48px rgba(100, 60, 20, 0.22),
-      0 4px 14px rgba(60, 35, 10, 0.12) !important;
+      0 0 0 1px rgba(184,146,60,0.25),
+      0 8px 40px rgba(120,80,10,0.28),
+      0 2px 8px rgba(120,80,10,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.45),
+      inset 0 -1px 0 rgba(120,80,10,0.15) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    /* override lift hover so it stays gold */
     transition: transform .5s cubic-bezier(.22,1,.36,1), box-shadow .5s cubic-bezier(.22,1,.36,1) !important;
+    /* slow float */
+    animation: ww-card-float 5s ease-in-out infinite;
   }
   #detailsCard:hover {
-    transform: translateY(-4px) !important;
+    transform: translateY(-6px) !important;
     box-shadow:
-      0 24px 56px rgba(100, 60, 20, 0.28),
-      0 6px 18px rgba(60, 35, 10, 0.14) !important;
+      0 0 0 1px rgba(184,146,60,0.35),
+      0 20px 55px rgba(120,80,10,0.32),
+      0 0 50px rgba(198,154,58,0.22),
+      inset 0 1px 0 rgba(255,255,255,0.5),
+      inset 0 -1px 0 rgba(120,80,10,0.18) !important;
+  }
+  @keyframes ww-card-float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-3px); }
+  }
+
+  /* Brushed-satin texture overlay on the card */
+  #detailsCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    background-image: repeating-linear-gradient(
+      92deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(255,255,255,0.045) 3px,
+      rgba(255,255,255,0.045) 4px
+    );
+  }
+
+  /* Metallic shimmer sweep — moves across every 5 s */
+  #detailsCard::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -80%;
+    width: 55%; height: 100%;
+    background: linear-gradient(
+      108deg,
+      transparent 15%,
+      rgba(255,255,255,0.38) 45%,
+      rgba(255,255,255,0.55) 50%,
+      rgba(255,255,255,0.38) 55%,
+      transparent 85%
+    );
+    pointer-events: none;
+    z-index: 2;
+    border-radius: inherit;
+    animation: ww-shimmer 5s ease-in-out infinite;
+  }
+  @keyframes ww-shimmer {
+    0%   { left: -80%; opacity: 0; }
+    8%   { opacity: 1; }
+    45%  { left: 120%; opacity: 1; }
+    50%  { left: 120%; opacity: 0; }
+    100% { left: 120%; opacity: 0; }
   }
 
   /* ── Decorative blob kept but tinted ────────────────────── */
@@ -664,27 +720,53 @@
     filter: drop-shadow(0 0 3px rgba(198,154,58,0.6));
   }
 
+  /* ── Scratch overlay border-radius matches new card ──────── */
+  .details-scratch-overlay {
+    border-radius: 30px;
+  }
+  .details-scratch-overlay.dc-done {
+    border-radius: 30px;
+  }
+
+  /* ── Section heading stays in existing gold palette ─────── */
+  /* (no change needed — it inherits fine) */
+
+  /* ============================================================
+     FULL-CARD SCRATCH-TO-REVEAL — When & Where Section
+     The entire glassmorphism card is covered by one scratch layer.
+     Scratching reveals all three details at once.
+  ============================================================ */
+
+  /* Content inside the card — hidden until revealed */
+  .details-content {
+    opacity: 1;
+  }
+  @keyframes dc-pop {
+    0%   { transform: scale(0.985); filter: blur(1.5px); }
+    100% { transform: scale(1);     filter: blur(0);      }
+  }
+  .details-content.dc-revealed {
+    animation: dc-pop 0.6s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
   /* Full-card overlay — covers the entire card absolutely */
   .details-scratch-overlay {
     position: absolute;
     inset: 0;
-    z-index: 20;
-    border-radius: 26px;
+    z-index: 5;
+    border-radius: 28px;
     overflow: hidden;
     cursor: crosshair;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
-    background: linear-gradient(105deg, #58331E 0%, #693E25 20%, #885832 45%, #AC8042 72%, #C49B54 92%, #B58C47 100%);
-    box-shadow: inset 0 0 0 1px rgba(255,230,160,0.3), inset 0 2px 10px rgba(0,0,0,0.25);
-    /* Subtle float before scratching */
+    /* Gentle float before scratching */
     animation: dc-float 4s ease-in-out infinite;
-    transition: opacity 0.8s cubic-bezier(.22,1,.36,1), transform 0.8s cubic-bezier(.22,1,.36,1);
   }
   .details-scratch-overlay.dc-done {
     opacity: 0;
-    transform: scale(1.02);
     pointer-events: none;
+    transition: opacity 0.8s cubic-bezier(.22,1,.36,1);
     animation: none;
   }
   @keyframes dc-float {
@@ -699,7 +781,6 @@
     display: block;
     width: 100%;
     height: 100%;
-    border-radius: inherit;
   }
 
   /* Hint: centered "Scratch to Reveal" on top of canvas */
@@ -710,10 +791,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     pointer-events: none;
-    z-index: 12;
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    z-index: 6;
+    transition: opacity 0.4s ease;
     overflow: hidden;
   }
   /* shimmer sweep across the whole card */
@@ -724,10 +805,10 @@
     width: 40%; height: 100%;
     background: linear-gradient(105deg,
       transparent 15%,
-      rgba(255,230,150,0.18) 50%,
+      rgba(255,220,130,0.22) 50%,
       transparent 85%
     );
-    animation: dc-shimmer 4.5s ease-in-out infinite;
+    animation: dc-shimmer 4s ease-in-out infinite;
     pointer-events: none;
   }
   @keyframes dc-shimmer {
@@ -735,58 +816,53 @@
     45%  { left: 120%; }
     100% { left: 120%; }
   }
-  .details-scratch-hint.dc-hint-gone { 
-    opacity: 0; 
-    transform: scale(0.9);
-  }
+  .details-scratch-hint.dc-hint-gone { opacity: 0; }
 
   /* Decorative pulsing ring behind the icon */
   .details-scratch-ring {
     position: absolute;
-    width: 46px; height: 46px;
+    width: 72px; height: 72px;
     border-radius: 50%;
-    border: 1px solid rgba(240, 222, 172, 0.45);
-    background: radial-gradient(circle, rgba(240, 222, 172, 0.15) 0%, transparent 70%);
-    animation: dc-ring-pulse 2.6s ease-in-out infinite;
+    border: 1px solid rgba(227,201,137,0.4);
+    animation: dc-ring-pulse 2.4s ease-in-out infinite;
   }
   @keyframes dc-ring-pulse {
-    0%, 100% { transform: scale(1);    opacity: 0.8; }
-    50%       { transform: scale(1.18); opacity: 0.3; }
+    0%, 100% { transform: scale(1);    opacity: 0.6; }
+    50%       { transform: scale(1.18); opacity: 0.2; }
   }
 
-  /* Finger icon badge */
+  /* Finger icon */
   .details-hint-icon {
-    width: 20px; height: 20px;
-    color: #F0DEAC;
+    width: 22px; height: 22px;
+    color: #E3C989;
     position: relative; z-index: 1;
-    filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
     animation: dc-icon-bounce 2s ease-in-out infinite;
   }
   @keyframes dc-icon-bounce {
     0%, 100% { transform: translateY(0);    }
-    50%       { transform: translateY(-3px); }
+    50%       { transform: translateY(-4px); }
   }
 
   /* Main label */
   .details-hint-label {
     font-family: 'Poppins', sans-serif;
-    font-size: 10.5px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 600;
     letter-spacing: 0.38em;
     text-transform: uppercase;
-    color: #F0DEAC;
-    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+    color: #E3C989;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.5);
     position: relative; z-index: 1;
-    margin-top: 4px;
   }
 
   /* Sub label */
   .details-hint-sub {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 14px;
+    font-size: 13px;
     font-style: italic;
-    color: rgba(240, 222, 172, 0.75);
-    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    color: rgba(227,201,137,0.7);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.4);
     position: relative; z-index: 1;
   }
 
@@ -1679,11 +1755,16 @@ document.addEventListener('DOMContentLoaded', () => {
     lightbox.classList.add('flex');
     if(window.lucide) lucide.createIcons();
   }
-  document.getElementById('lightboxClose').addEventListener('click', () => {
-    lightbox.classList.add('hidden');
-    lightbox.classList.remove('flex');
-  });
-  lightbox.addEventListener('click', (e) => { if(e.target === lightbox){ lightbox.classList.add('hidden'); lightbox.classList.remove('flex'); } });
+  const lbClose = document.getElementById('lightboxClose');
+  if (lbClose) {
+    lbClose.addEventListener('click', () => {
+      lightbox.classList.add('hidden');
+      lightbox.classList.remove('flex');
+    });
+  }
+  if (lightbox) {
+    lightbox.addEventListener('click', (e) => { if(e.target === lightbox){ lightbox.classList.add('hidden'); lightbox.classList.remove('flex'); } });
+  }
 
   /* ---------------- Add to Calendar ---------------- */
   (function(){
@@ -1774,6 +1855,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calModal = document.getElementById('calendarModal');
 
     function openCalendarModal(){
+      if (!calModal) return;
       calModal.classList.remove('hidden');
       calModal.classList.add('flex');
       requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -1781,6 +1863,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }));
     }
     function closeCalendarModal(){
+      if (!calModal) return;
       calModal.classList.remove('modal-active');
       setTimeout(() => {
         calModal.classList.add('hidden');
@@ -1809,32 +1892,35 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   /* ---------------- RSVP form ---------------- */
+  const rsvpForm = document.getElementById('rsvpForm');
   const RSVP_URL = 'https://script.google.com/macros/s/AKfycbx8D50nwO51PJKbricL1_o4tN-GwczAPPssB4TzdnJY08xfrI9qEdbpsf0w4gB5Kn2U/exec';
-  document.getElementById('rsvpForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!RSVP_URL) return;
-    const form = e.currentTarget;
-    const btn = document.getElementById('rsvpSubmit');
-    const btnText = document.getElementById('rsvpBtnText');
-    const success = document.getElementById('rsvpSuccess');
-    const payload = Object.fromEntries(new FormData(form).entries());
-    btnText.textContent = 'Sending...';
-    btn.disabled = true;
-    try {
-      const res = await fetch(RSVP_URL, { method: 'POST', body: JSON.stringify(payload) });
-      const data = await res.json();
-      if (data && data.ok) {
-        btnText.textContent = 'Sent';
-        success.classList.remove('hidden');
-        form.reset();
-      } else {
-        throw new Error(data && data.message || 'Server error');
+  if (rsvpForm) {
+    rsvpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!RSVP_URL) return;
+      const form = e.currentTarget;
+      const btn = document.getElementById('rsvpSubmit');
+      const btnText = document.getElementById('rsvpBtnText');
+      const success = document.getElementById('rsvpSuccess');
+      const payload = Object.fromEntries(new FormData(form).entries());
+      if (btnText) btnText.textContent = 'Sending...';
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch(RSVP_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (data && data.ok) {
+          if (btnText) btnText.textContent = 'Sent';
+          if (success) success.classList.remove('hidden');
+          form.reset();
+        } else {
+          throw new Error(data && data.message || 'Server error');
+        }
+      } catch (err) {
+        if (btnText) btnText.textContent = 'Send RSVP';
+        if (btn) btn.disabled = false;
       }
-    } catch (err) {
-      btnText.textContent = 'Send RSVP';
-      btn.disabled = false;
-    }
-  });
+    });
+  }
 
   /* ---------------- ripple effect ---------------- */
   document.querySelectorAll('.ripple').forEach(btn => {
@@ -1864,9 +1950,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ================================================================
      FULL-CARD SCRATCH-TO-REVEAL — When & Where
-     - Opaque luxury gold leaf scratch coating
-     - Guaranteed initial coverage across all screen sizes
-     - Interactive tactile scratch with sparkles & reveal burst
+     Clean rewrite: no DPR scaling bugs, single source of truth
+     for dimensions, events and coordinates all from same element.
   ================================================================ */
   (function initFullCardScratch() {
 
@@ -1878,176 +1963,136 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!card || !sc || !overlay) return;
 
-    const ctx = sc.getContext('2d', { willReadFrequently: true });
+    const ctx = sc.getContext('2d');
     let painted = false;
     let done    = false;
-    let userHasScratched = false;
-    let strokeCount = 0;
 
     /* ── Paint scratch layer ─────────────────────────────── */
+    // Called once the card has real layout dimensions.
+    // Canvas pixel buffer = card CSS px (no DPR — keeps it simple
+    // and avoids all coordinate-scaling bugs entirely).
     function paint() {
-      const rect = overlay.getBoundingClientRect();
-      const W = Math.round(rect.width || card.offsetWidth);
-      const H = Math.round(rect.height || card.offsetHeight);
-      if (W < 40 || H < 40) return false;
+      const W = card.offsetWidth;
+      const H = card.offsetHeight;
+      if (!W || !H) return false;
 
       sc.width  = W;
       sc.height = H;
 
+      const r = 30;
       ctx.globalCompositeOperation = 'source-over';
-      ctx.clearRect(0, 0, W, H);
 
-      // Exact smooth gradient matching reference:
-      // Left: deep warm chestnut bronze (#58331E) -> Mid: warm amber (#8A5832) -> Right: honey gold (#C59B54)
-      const base = ctx.createLinearGradient(0, 0, W, H * 0.35);
-      base.addColorStop(0,    '#58331E');
-      base.addColorStop(0.20, '#693E25');
-      base.addColorStop(0.45, '#885832');
-      base.addColorStop(0.72, '#AC8042');
-      base.addColorStop(0.92, '#C49B54');
-      base.addColorStop(1,    '#B58C47');
+      // Clip to rounded rect
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(r, 0); ctx.lineTo(W-r, 0);
+      ctx.quadraticCurveTo(W, 0, W, r);
+      ctx.lineTo(W, H-r); ctx.quadraticCurveTo(W, H, W-r, H);
+      ctx.lineTo(r, H);   ctx.quadraticCurveTo(0, H, 0, H-r);
+      ctx.lineTo(0, r);   ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.closePath();
+      ctx.clip();
+
+      // Rich maroon-to-gold base
+      const base = ctx.createLinearGradient(0, 0, W, H);
+      base.addColorStop(0,    '#8B5340');
+      base.addColorStop(0.33, '#946D43');
+      base.addColorStop(0.66, '#B7914C');
+      base.addColorStop(1,    '#E1C786');
       ctx.fillStyle = base;
       ctx.fillRect(0, 0, W, H);
 
-      // Subtle ambient top-to-bottom soft lighting
-      const sheen = ctx.createLinearGradient(0, 0, 0, H);
-      sheen.addColorStop(0,    'rgba(255, 238, 180, 0.14)');
-      sheen.addColorStop(0.45, 'rgba(255, 255, 255, 0.02)');
-      sheen.addColorStop(1,    'rgba(20, 8, 4, 0.22)');
+      // Diagonal metallic sheen
+      const sheen = ctx.createLinearGradient(0, 0, W, H);
+      sheen.addColorStop(0,    'rgba(255,200,80,0)');
+      sheen.addColorStop(0.45, 'rgba(255,230,140,0.18)');
+      sheen.addColorStop(0.55, 'rgba(255,230,140,0.18)');
+      sheen.addColorStop(1,    'rgba(255,200,80,0)');
       ctx.fillStyle = sheen;
       ctx.fillRect(0, 0, W, H);
 
-      // Delicate subtle inner gold rim
-      ctx.strokeStyle = 'rgba(255, 235, 170, 0.25)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(1, 1, W - 2, H - 2);
+      // Fine diagonal texture lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 0.8;
+      for (let i = -H; i < W + H; i += 9) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.stroke();
+      }
+
+      // Radial vignette
+      const vig = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
+      vig.addColorStop(0, 'rgba(60,10,20,0)');
+      vig.addColorStop(1, 'rgba(15,3,8,0.5)');
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.restore();
 
       painted = true;
       return true;
     }
 
-    /* ── Retry paint until card has real dimensions ───────── */
+    /* ── Retry paint until card has dimensions ───────────── */
     function tryPaint() {
-      if (done || userHasScratched) return;
-      if (!paint()) {
-        requestAnimationFrame(tryPaint);
-      }
+      if (done || painted) return;
+      if (!paint()) requestAnimationFrame(tryPaint);
     }
 
-    // Paint triggers
-    tryPaint();
-    window.addEventListener('load', tryPaint);
-    document.addEventListener('DOMContentLoaded', tryPaint);
-    setTimeout(tryPaint, 250);
-    setTimeout(tryPaint, 800);
+    window.addEventListener('load', () => requestAnimationFrame(tryPaint), { once: true });
+    requestAnimationFrame(tryPaint);
 
-    // Also repaint when the intro closes / site becomes visible
-    const openBtn = document.getElementById('openBtn');
-    if (openBtn) {
-      openBtn.addEventListener('click', () => {
-        setTimeout(tryPaint, 300);
-        setTimeout(tryPaint, 700);
-      });
-    }
-
-    // Trigger when scrolled into view
+    // Also trigger when section scrolls into view
     new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting && !userHasScratched && !done) {
-          tryPaint();
-        }
-      });
+      entries.forEach(e => { if (e.isIntersecting && !painted && !done) tryPaint(); });
     }, { threshold: 0.05 }).observe(card);
 
-    // Repaint on resize if user hasn't scratched yet
+    // Repaint on resize
     let rTimer;
     window.addEventListener('resize', () => {
       clearTimeout(rTimer);
-      rTimer = setTimeout(() => {
-        if (!userHasScratched && !done) {
-          paint();
-        }
-      }, 150);
+      rTimer = setTimeout(() => { if (!done) { painted = false; tryPaint(); } }, 200);
     });
 
     /* ── Erase brush ────────────────────────────────────── */
+    // Coordinates come from sc.getBoundingClientRect().
+    // sc.width === card.offsetWidth (CSS px, no DPR), so
+    // CSS client coords map 1:1 to canvas buffer coords.
     const BRUSH = 46;
 
     function erase(clientX, clientY) {
-      if (done) return;
-      if (!userHasScratched) {
-        userHasScratched = true;
-        overlay.style.background = 'transparent';
-      }
-      if (!painted) { paint(); }
-      strokeCount++;
-
+      if (!painted || done) return;
       const rect = sc.getBoundingClientRect();
-      const scaleX = sc.width / rect.width;
+      // Scale: CSS rendered size → canvas buffer size
+      const scaleX = sc.width  / rect.width;
       const scaleY = sc.height / rect.height;
-      const x = (clientX - rect.left) * scaleX;
-      const y = (clientY - rect.top) * scaleY;
-      const r = BRUSH * Math.max(scaleX, 1);
+      const x = (clientX - rect.left)  * scaleX;
+      const y = (clientY - rect.top)   * scaleY;
+      const r = BRUSH * scaleX;
 
       ctx.globalCompositeOperation = 'destination-out';
       const g = ctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0,   'rgba(0,0,0,1)');
-      g.addColorStop(0.6, 'rgba(0,0,0,0.92)');
+      g.addColorStop(0.5, 'rgba(0,0,0,0.95)');
       g.addColorStop(1,   'rgba(0,0,0,0)');
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.arc(x, y, r, 0, Math.PI*2);
       ctx.fillStyle = g;
       ctx.fill();
-
-      // Fade hint on active scratch
-      if (hint && !hint.classList.contains('dc-hint-gone')) {
-        hint.style.opacity = Math.max(0, 1 - (strokeCount * 0.08)).toString();
-      }
-
-      // Spawn scratch dust
-      if (Math.random() < 0.35) {
-        spawnScratchSparkle(clientX, clientY);
-      }
     }
 
-    /* ── Scratch sparkle dust ────────────────────────────── */
-    function spawnScratchSparkle(x, y) {
-      const el = document.createElement('span');
-      el.className = 'sc-sparkle';
-      const size = (2.5 + Math.random() * 3).toFixed(1);
-      const tx = (Math.random() - 0.5) * 36;
-      const ty = (Math.random() - 0.5) * 36;
-      el.style.cssText =
-        `left:${x}px;top:${y}px;width:${size}px;height:${size}px;` +
-        `margin-left:-${size/2}px;margin-top:-${size/2}px;` +
-        `--tx:${tx.toFixed(1)}px;--ty:${ty.toFixed(1)}px;` +
-        `--dur:0.55s;`;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 600);
-    }
-
-    /* ── Threshold check (only runs after user interacted) ── */
+    /* ── Threshold check ────────────────────────────────── */
     let checking = false;
     function scheduleCheck() {
-      if (checking || !userHasScratched || done || strokeCount < 8) return;
+      if (checking || !painted || done) return;
       checking = true;
       requestAnimationFrame(() => {
         checking = false;
-        try {
-          const d = ctx.getImageData(0, 0, sc.width, sc.height).data;
-          let total = 0, clear = 0;
-          // Step by 32 bytes (8 pixels) for efficiency
-          for (let i = 3; i < d.length; i += 32) {
-            total++;
-            if (d[i] < 120) clear++;
-          }
-          if (total > 0 && (clear / total) >= 0.38) {
-            completeReveal();
-          }
-        } catch (err) {
-          // If cross-origin or canvas read error, reveal after sufficient strokes
-          if (strokeCount > 40) completeReveal();
+        const d = ctx.getImageData(0, 0, sc.width, sc.height).data;
+        let total = 0, clear = 0;
+        for (let i = 3; i < d.length; i += 4 * 6) {
+          total++;
+          if (d[i] < 128) clear++;
         }
+        if (total > 0 && clear / total >= 0.35) completeReveal();
       });
     }
 
@@ -2062,15 +2107,15 @@ document.addEventListener('DOMContentLoaded', () => {
       spawnSparkles();
     }
 
-    /* ── Celebratory Sparkles Burst ──────────────────────── */
+    /* ── Sparkles ───────────────────────────────────────── */
     function spawnSparkles() {
       const rect = card.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      for (let i = 0; i < 28; i++) {
-        const angle = (i / 28) * Math.PI * 2 + (Math.random() - 0.5) * 0.7;
-        const dist  = 50 + Math.random() * 110;
-        const size  = (3 + Math.random() * 5).toFixed(1);
+      const cx = rect.left + rect.width  / 2;
+      const cy = rect.top  + rect.height / 2;
+      for (let i = 0; i < 22; i++) {
+        const angle = (i / 22) * Math.PI * 2 + (Math.random() - 0.5) * 0.7;
+        const dist  = 40 + Math.random() * 80;
+        const size  = (3 + Math.random() * 4).toFixed(1);
         const el    = document.createElement('span');
         el.className = 'sc-sparkle';
         el.style.cssText =
@@ -2078,42 +2123,38 @@ document.addEventListener('DOMContentLoaded', () => {
           `margin-left:-${size/2}px;margin-top:-${size/2}px;` +
           `--tx:${(Math.cos(angle)*dist).toFixed(1)}px;` +
           `--ty:${(Math.sin(angle)*dist).toFixed(1)}px;` +
-          `--dur:${(0.6 + Math.random()*0.7).toFixed(2)}s;` +
-          `animation-delay:${(Math.random()*0.2).toFixed(2)}s;`;
+          `--dur:${(0.5 + Math.random()*0.6).toFixed(2)}s;` +
+          `animation-delay:${(Math.random()*0.25).toFixed(2)}s;`;
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1600);
+        setTimeout(() => el.remove(), 1400);
       }
     }
 
-    /* ── Event listeners ─────────────────────────────────── */
+    /* ── Events ─────────────────────────────────────────── */
     let active = false;
 
     function onStart(e) {
       if (done) return;
-      if (!painted) { paint(); }
+      if (!painted) { tryPaint(); return; }
+      e.preventDefault();
       active = true;
       const s = e.touches ? e.touches[0] : e;
       erase(s.clientX, s.clientY);
     }
-
     function onMove(e) {
       if (!active || done) return;
-      if (e.cancelable) e.preventDefault();
+      e.preventDefault();
       const s = e.touches ? e.touches[0] : e;
       erase(s.clientX, s.clientY);
       scheduleCheck();
     }
-
-    function onEnd() {
-      active = false;
-      if (userHasScratched && !done) scheduleCheck();
-    }
+    function onEnd() { active = false; }
 
     overlay.addEventListener('mousedown',   onStart, { passive: false });
     overlay.addEventListener('mousemove',   onMove,  { passive: false });
     overlay.addEventListener('mouseup',     onEnd);
     overlay.addEventListener('mouseleave',  onEnd);
-    overlay.addEventListener('touchstart',  onStart, { passive: true });
+    overlay.addEventListener('touchstart',  onStart, { passive: false });
     overlay.addEventListener('touchmove',   onMove,  { passive: false });
     overlay.addEventListener('touchend',    onEnd);
     overlay.addEventListener('touchcancel', onEnd);
@@ -2122,10 +2163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.setAttribute('role', 'button');
     overlay.setAttribute('aria-label', 'Scratch to reveal wedding details');
     overlay.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        completeReveal();
-      }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); completeReveal(); }
     });
 
   })(); // end initFullCardScratch
